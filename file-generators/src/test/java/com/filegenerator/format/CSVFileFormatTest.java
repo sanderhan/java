@@ -13,6 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.filegenerator.format.spec.CSVFileSpecification;
+
 import org.junit.Assert;
 
 class CSVFileFormatTest  {
