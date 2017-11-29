@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.filegenerator.format.spec.CSVFileSpecification;
+import com.filegenerator.format.spec.FileSpecification;
+
 public class CSVFileFormat 
 	extends FileFormat {
 

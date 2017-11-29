@@ -1,4 +1,4 @@
-package com.filegenerator.format;
+package com.filegenerator.format.spec;
 
 import lombok.Data;
 

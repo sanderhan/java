@@ -3,6 +3,8 @@ package com.filegenerator.format;
 import java.util.List;
 import java.util.Map;
 
+import com.filegenerator.format.spec.FileSpecification;
+
 public abstract class FileFormat {
 	
 	public static enum Type {
