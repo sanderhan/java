@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: fileservice
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: Sander
+Implementation-Vendor-Id: com.practic.spring
+Build-Jdk: 1.8.0_111
+Implementation-URL: http://projects.spring.io/spring-boot/fileservice/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+
