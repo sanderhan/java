@@ -9,8 +9,8 @@
         <module name="file-generators" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8">
-      <module name="file-generators" target="1.8" />
+    <bytecodeTargetLevel>
+      <module name="file-generators" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

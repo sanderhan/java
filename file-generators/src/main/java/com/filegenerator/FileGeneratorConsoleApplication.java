@@ -1,39 +1,13 @@
 package com.filegenerator;
 
-import com.filegenerator.format.RecordFormat;
 import org.apache.commons.cli.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-@SpringBootApplication
-public class FileGeneratorConsoleApplication implements CommandLineRunner {
+public class FileGeneratorConsoleApplication {
 
-    @Autowired
-    IFileGenerator generator;
+    public static void main(String[] args)
+            throws Exception {
 
-    @Autowired
-    ApplicationContext ctx;
-
-    public static void main(String[] args) throws Exception {
-
-        SpringApplication.run(FileGeneratorConsoleApplication.class, args);
-
-    }
-
-    @Override
-    public void run(String... strings) throws Exception {
         System.out.println("File Generator");
 
 
@@ -52,7 +26,7 @@ public class FileGeneratorConsoleApplication implements CommandLineRunner {
 
         CommandLineParser parser = new DefaultParser();
 
-        CommandLine commandLine = parser.parse(options, strings);
+        CommandLine commandLine = parser.parse(options, args);
         if(commandLine.hasOption("i") ){
             infile = commandLine.getOptionValue("i");
         }
@@ -64,6 +38,11 @@ public class FileGeneratorConsoleApplication implements CommandLineRunner {
         }
 
         System.out.println(String.format("Input %s, out to %s, format:%s", infile, outfile, format));
+        IFileGenerator generator = FileGeneratorFactory.ceateFileGenerator();
+
         generator.cvsToFile(infile, outfile, format);
+
     }
+
+
 }

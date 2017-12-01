@@ -59,6 +59,7 @@ public final class FieldFormat {
     }
 
     public String format(Object value){
+        
         String formatted = value.toString();
         if(pattern != null){
             formatted = String.format(pattern, value);
