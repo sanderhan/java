@@ -3,12 +3,10 @@ package com.filegenerator;
 import com.filegenerator.format.RecordFormat;
 import com.opencsv.CSVReader;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +23,14 @@ public interface IFileGenerator {
             throws SQLException, IOException;
 
     public void cvsToWriter(Writer writer, CSVReader reader, RecordFormat format)
-            throws IOException;
+            throws IOException, ParseException, InvalidFormatDefinition;
 
     public void cvsToFile(String inCsvFile, String outFile, String formatFile)
             throws IOException, InvalidFormatDefinition;
+
+    public List<Object[]> readToDataSet(InputStream in, RecordFormat format)
+            throws InvalidFormatDefinition;
+    public List<Object[]> readFileToDataSet(String inFile, String formatFile)
+            throws InvalidFormatDefinition,IOException;
+
 }

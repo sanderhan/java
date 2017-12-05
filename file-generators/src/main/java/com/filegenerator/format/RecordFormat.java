@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -79,6 +80,44 @@ public class RecordFormat {
     }
 
 
+    //Parser
+
+    public Object[] parseValues(String ... values) throws ParseException {
+        Object [] ret = new Object[values.length];
+
+        for(int i=0; i< values.length; i++){
+            Object o = values[i];
+            if(indexedFields != null) {
+                FieldFormat field = indexedFields[i];
+                o = field.parse(o.toString());
+            }
+            ret[i] = o;
+        }
+        return ret;
+    }
+
+    public Object[] parseLine(String recordLine) throws ParseException {
+
+        if("".equals(delimiter)){ //fixed length
+            int offset = 0;
+            String [] values = new String[indexedFields.length];
+
+            for(int i=0; i< indexedFields.length; i++){
+                FieldFormat field = indexedFields[i];
+                int width = field.width;
+                if(width <=0) {
+                    throw new ParseException(String.format("field %d missed width.", (i+1)), offset);
+                }
+                String value = recordLine.substring(offset, offset+width);
+                values[i] = value;
+                offset = offset+width;
+            }
+            return parseValues(values);
+        }else{ // delimiter separated
+            String[] values = recordLine.split(String.valueOf(delimiter));
+            return parseValues(values);
+        }
+    }
 
     // Below are format implementations
 
@@ -99,7 +138,7 @@ public class RecordFormat {
         return sj.toString();
     }
 
-    public String format(List<Object> values){
+    public String formatList(List<Object> values){
         return format(values.toArray());
     }
 
@@ -123,11 +162,6 @@ public class RecordFormat {
             }
             format(sb,values);
         }
-    }
-
-
-    public List<Object> parse(String line){
-            return null;
     }
 
 
