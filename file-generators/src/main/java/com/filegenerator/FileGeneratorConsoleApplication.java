@@ -1,5 +1,6 @@
 package com.filegenerator;
 
+import com.filegenerator.common.NACHAFile;
 import org.apache.commons.cli.*;
 
 
@@ -38,9 +39,10 @@ public class FileGeneratorConsoleApplication {
         }
 
         System.out.println(String.format("Input %s, out to %s, format:%s", infile, outfile, format));
-        IFileGenerator generator = FileGeneratorBuilder.ceateFileGenerator();
+        IFileGenerator generator = FileGeneratorFactory.getFileGenerator("NACHA");
+        NACHAFile f = (NACHAFile) generator.readFile(infile);
 
-        generator.cvsToFile(infile, outfile, format);
+        System.out.print(f.getImmediateOriginName());
 
     }
 

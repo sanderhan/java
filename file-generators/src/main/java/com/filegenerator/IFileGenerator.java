@@ -1,21 +1,19 @@
 package com.filegenerator;
 
-import com.filegenerator.format.IFormat;
-import com.filegenerator.format.RecordFormat;
-import com.opencsv.CSVReader;
+import com.filegenerator.common.InvalidFormatDefinition;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 
 public interface IFileGenerator<T> {
 
-    IFormat formatter = null;
 
-    public T readFromCsvFile(String inCsvFile, String formatFile)
-            throws IOException, InvalidFormatDefinition;
+    public void writeFile(Writer writer,T inObject) throws IOException;
+    public void writeFile(String outFile,T inObject) throws IOException;
 
-    public T readFile(InputStream in);
-    public T readFile(String inFile);
+    public T readFile(InputStream in) throws InvalidFormatDefinition;
+    public T readFile(String inFile) throws IOException, InvalidFormatDefinition;
 
 }

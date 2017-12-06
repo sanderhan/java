@@ -1,4 +1,4 @@
-package com.filegenerator;
+package com.filegenerator.common;
 
 public class InvalidFormatDefinition
         extends Exception {

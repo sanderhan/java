@@ -1,18 +1,28 @@
 package com.filegenerator.format;
 
-import com.filegenerator.InvalidFormatDefinition;
+import com.filegenerator.common.InvalidFormatDefinition;
 import com.filegenerator.common.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class NACHAFormat implements  IFormat<NACHAFile>{
 
+
+    private static final Map<String,RecordFormat> formatterMap = new HashMap<String, RecordFormat>();
+    static {
+        formatterMap.put("FILE_HEADER", NACHAFormat.NACHA_FILE_HEADER);
+        formatterMap.put("BATCH_HEADER", NACHAFormat.NACHA_BATCH_HEADER);
+        formatterMap.put("BATCH_CONTROL", NACHAFormat.NACHA_BATCH_CONTROL);
+        formatterMap.put("FILE_CONTROL", NACHAFormat.NACHA_FILE_CONTROL);
+        formatterMap.put("ENTRY", NACHAFormat.NACHA_ENTRY);
+        formatterMap.put("ADDENDA", NACHAFormat.NACHA_ADDENDA);
+    }
 
     public static enum RecordType {
 
@@ -256,6 +266,92 @@ public class NACHAFormat implements  IFormat<NACHAFile>{
         }
     }
 
+    @Override
+    public void format(Writer writer, NACHAFile file)
+            throws IOException {
+
+        Object[] header = file.toFileHeaderArray();
+        writer.append(NACHA_FILE_HEADER.format(header));
+
+        int batchCount = 0;
+        int blockCount = 0;
+        int entryCount = 0;
+
+        int recordCount =0;
+
+        BigDecimal totalDebits = BigDecimal.valueOf(0);
+        BigDecimal totalCredits = BigDecimal.valueOf(0);
+        long entryHashSum = 0;
+
+        for(NACHACompanyBatch batch : file.getBatches()){
+            batchCount++;
+            batch.setBatchNumber(batchCount);
+            writer.append(NACHA_BATCH_HEADER.format(batch.toBatchHeaderArray()));
+
+            int batchEntryCount = 0;
+            int batchAddendaCount = 0;
+            BigDecimal batchTotalDebits = BigDecimal.valueOf(0);
+            BigDecimal batchTotalCredits = BigDecimal.valueOf(0);
+
+            for(NACHAEntry entry : batch.getEntries()) {
+                batchEntryCount++;
+                entry.setSequence(batchEntryCount);
+                entry.setOriginDFI(batch.getOriginDFI());
+
+                writer.append(NACHA_ENTRY.format(entry.toArray()));
+
+                if (isCredit(entry.getTransactionCode())) {
+                    batchTotalCredits.add(entry.getAmount());
+                } else {
+                    batchTotalDebits.add(entry.getAmount());
+                }
+
+                if(entry.hasAddenda()){
+                    List<NACHAAddenda> addendas = formatAddenda(batchEntryCount,entry.getAddendaType(),entry.getAddenda() );
+                    for(NACHAAddenda addenda : addendas){
+                        writer.append(NACHA_ADDENDA.format(addenda.toArray()));
+                        batchAddendaCount++;
+                    }
+                }
+
+            }
+            NACHABatchControl batchControl = new NACHABatchControl();
+            batchControl.setBatchNumber(batchCount);
+            batchControl.setEntryCount(batchAddendaCount >0? batchAddendaCount: batchEntryCount);
+            batchControl.setOriginDFI(batch.getOriginDFI());
+            batchControl.setServiceClassCode(batch.getServiceClassCode());
+            batchControl.setTotalCredits(batchTotalCredits);
+            batchControl.setTotalDebits(batchTotalDebits);
+
+            totalCredits.add(batchTotalCredits);
+            totalDebits.add(batchTotalDebits);
+
+            writer.append(NACHA_BATCH_CONTROL.format(batchControl.toArray()));
+            recordCount  = recordCount + batchEntryCount + batchAddendaCount;
+
+        }
+
+        recordCount = recordCount +2;
+        blockCount = recordCount/BLOCK_SIZE +1;
+
+        NACHAFileControl fileControl = new NACHAFileControl();
+        fileControl.setBatchCount(batchCount);
+        fileControl.setBlockCount(blockCount);
+        fileControl.setEntryCount(entryCount);
+        fileControl.setTotalCredits(totalCredits);
+        fileControl.setTotalDebits(totalDebits);
+
+
+        fileControl.setEntryHash(entryHashSum);
+
+        writer.append(NACHA_FILE_CONTROL.format(fileControl.toArray()));
+
+        int fillingCount = recordCount%BLOCK_SIZE;
+        for(int i=0; i< fillingCount; i++){
+            writer.append(FILLING);
+        }
+
+    }
 
 
     @Override

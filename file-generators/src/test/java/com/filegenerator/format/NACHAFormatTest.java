@@ -1,7 +1,8 @@
 package com.filegenerator.format;
 
-import com.filegenerator.FileGeneratorBuilder;
-import com.filegenerator.InvalidFormatDefinition;
+import com.filegenerator.FileGenerator;
+import com.filegenerator.FileGeneratorFactory;
+import com.filegenerator.common.InvalidFormatDefinition;
 import com.filegenerator.NACHAGenerator;
 import com.filegenerator.common.NACHAFile;
 
@@ -18,19 +19,17 @@ public class NACHAFormatTest {
     public void parseNACHAFile() {
         String testACHFile ="C:\\Workspaces\\test\\1521422559orig_TGE1215A.ach";
 
-        NACHAGenerator generator = FileGeneratorBuilder.ceateNACHAGenerator();
+        NACHAGenerator generator = (NACHAGenerator) FileGeneratorFactory.getFileGenerator("NACHA");
         NACHAFile file = null;
         try {
-            file = generator.readNACHAFile(new FileInputStream(testACHFile));
+            file = generator.readFile(new FileInputStream(testACHFile));
+            assertEquals(1, file.getBatches().size());
         } catch (InvalidFormatDefinition invalidFormatDefinition) {
             invalidFormatDefinition.printStackTrace();
-            fail("InvalidaFormat");
-        } catch (ParseException e) {
-            e.printStackTrace();
-            fail("InvalidaFormat: parsing ");
+            fail("Invaild NACHA file");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            fail("cannot find file.");
+            fail("Cannot find NACHA file");
         }
         assertEquals(file.getBatches().size(),1);
     }
