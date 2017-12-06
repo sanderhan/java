@@ -3,39 +3,22 @@ package com.filegenerator.format;
 import com.filegenerator.InvalidFormatDefinition;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FlatFileFormat implements IFormat<Map<String,List<<List<Object>>>{
+public class FlatFileFormat implements IFormat<Map<String,List<Object[]>>{
 
-    String name;
+    Map<String,RecordFormat> formatterMap = new HashMap<>();
 
-    Map<String,RecordFormat> formatterMap;
 
-    public boolean hasHead(){
-        if(headFormat != null)
-            return true;
-        else
-            return false;
+    public FlatFileFormat(Map<String,RecordFormat>  namedFormats){
+        this.formatterMap = namedFormats
     }
-    public boolean hasTail(){
-        if(tailFormat != null)
-            return true;
-        else
-            return false;
-    }
-
-
-    public String format(List<Object> headers, List<<List<Object>> details, List<Object> tailers){
-        StringBuilder sb = new StringBuilder();
-        format(headers, details, tailers);
-        return sb.toString();
-    }
-
 
     @Override
-    public void format(StringBuilder sb, Map<String, List> dataSets) {
-        for (Map.Entry<String, String> entry : dataSets.entrySet())
+    public void format(StringBuilder sb, Map<String, List<Object[]>> dataSets) {
+        for (Map.Entry<String, List<Object[]>> entry : dataSets.entrySet())
         {
             String dataSetName = entry.getKey();
             List dataSet = entry.getValue();
@@ -45,7 +28,7 @@ public class FlatFileFormat implements IFormat<Map<String,List<<List<Object>>>{
     }
 
     @Override
-    public Map<String, List<<List<Object>>  parse(InputStream in) throws InvalidFormatDefinition {
+    public Map<String,List<Object[]>>  parse(InputStream in) throws InvalidFormatDefinition {
         return null;
     }
 }
