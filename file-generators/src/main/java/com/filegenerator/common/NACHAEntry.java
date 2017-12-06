@@ -13,8 +13,8 @@ public class NACHAEntry {
     int checkDigit;
     String DFIAccount;
     BigDecimal amount = new BigDecimal(0);
-    String individialID;
-    String individialName;
+    String individualID;
+    String individualName;
     String discretionaryData;
     String originDFI;
     int sequence;
@@ -27,17 +27,33 @@ public class NACHAEntry {
     }
     public Object[] toArray(){
         return new Object[]{
-                Integer.valueOf(transactionCode),
+                recordType,
+                transactionCode,
                 receivingDFI,
-                Integer.valueOf(checkDigit),
+                checkDigit,
                 DFIAccount,
-                amount,
-                individialID,
-                individialName,
+                amount.movePointRight(2).intValue(),
+                individualID,
+                individualName,
                 discretionaryData,
-                addenda == null ? Integer.valueOf(0) : Integer.valueOf(1),
+                addenda == null ? 0 : 1,
                 originDFI,
-                Integer.valueOf(sequence)
+                sequence
         };
+    }
+
+    public void setValues(Object[] values){
+        recordType = Integer.valueOf(values[0].toString()).intValue();
+        transactionCode = Integer.valueOf(values[1].toString()).intValue();
+        receivingDFI = (String) values[2];
+        checkDigit = Integer.valueOf(values[3].toString()).intValue();
+        DFIAccount = (String) values[4];
+        amount = new BigDecimal((long)values[5]).movePointLeft(2);
+        individualID = (String) values[6];
+        individualName = (String) values[7];
+        discretionaryData = (String) values[8];
+        //addenda = (String) values[9];
+        originDFI = (String) values[10];
+        sequence = Integer.valueOf(values[11].toString()).intValue();
     }
 }

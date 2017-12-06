@@ -18,16 +18,29 @@ public class NACHABatchControl {
 
     public Object[] toArray(){
         return new Object[]{
-                Integer.valueOf(serviceClassCode),
-                Integer.valueOf(entryCount),
-                totalDebits,
-                totalCredits,
+                recordType,
+                serviceClassCode,
+                entryCount,
+                totalDebits.movePointRight(2).intValue(),
+                totalCredits.movePointRight(2).intValue(),
                 companyID,
                 messageAuthenticationCode,
                 "",
                 originDFI,
-                Integer.valueOf(batchNumber)
+                batchNumber
         };
     }
 
+    public void setValues(Object[] values){
+        recordType = Integer.valueOf(values[0].toString()).intValue();
+        serviceClassCode = Integer.valueOf(values[1].toString()).intValue();
+        entryCount = Integer.valueOf(values[2].toString()).intValue();
+        totalDebits = new BigDecimal((long)values[3]).movePointLeft(2);
+        totalCredits = new BigDecimal( (long)values[4]).movePointLeft(2);
+        companyID = (String) values[5];
+        messageAuthenticationCode = (String) values[6];
+        // skip reserved field values[7]
+        originDFI = (String) values[8];
+        batchNumber = Integer.valueOf(values[9].toString()).intValue();
+    }
 }

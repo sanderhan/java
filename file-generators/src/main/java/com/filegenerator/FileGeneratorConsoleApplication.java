@@ -38,7 +38,7 @@ public class FileGeneratorConsoleApplication {
         }
 
         System.out.println(String.format("Input %s, out to %s, format:%s", infile, outfile, format));
-        IFileGenerator generator = FileGeneratorFactory.ceateFileGenerator();
+        IFileGenerator generator = FileGeneratorBuilder.ceateFileGenerator();
 
         generator.cvsToFile(infile, outfile, format);
 

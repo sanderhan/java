@@ -131,17 +131,35 @@ public final class FieldFormat {
     }
 
     public Object parse(String value) throws ParseException {
+
+        if(value == null)
+            return null;
+
         try {
-            String paddignRegex ;
+
+            String paddingRegex ;
             if(align == Alignment.LEFT){
-                paddignRegex = String.format("%s.+$", String.valueOf(padChar));
+                paddingRegex = String.format("(%s)+$", String.valueOf(padChar));
             }else{
-                paddignRegex = String.format("^%s.+", String.valueOf(padChar));
+                paddingRegex = String.format("^(%s)+", String.valueOf(padChar));
             }
-            value = value.replaceFirst(paddignRegex, "");
+            value = value.replaceFirst(paddingRegex, "");
 
             if (formatter != null) {
-                return formatter.parseObject(value);
+                if(this.type == DataType.STRING )
+                    return value;
+                else if ("".equals(value)){
+                    if(type == DataType.INT)
+                        return Integer.valueOf(0);
+                    else if(type == DataType.DECIMAL
+                                || type == DataType.MONEY
+                                || type == DataType.PERCENT)
+                        return new BigDecimal(0);
+                    else
+                        return null;
+                }else {
+                    return formatter.parseObject(value);
+                }
             } else {
                 return value;
             }

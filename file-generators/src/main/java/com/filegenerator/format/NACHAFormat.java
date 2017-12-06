@@ -1,17 +1,17 @@
 package com.filegenerator.format;
 
+import com.filegenerator.InvalidFormatDefinition;
 import com.filegenerator.common.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.IntStream;
 
-public class NACHAFormat {
+public class NACHAFormat implements  IFormat<NACHAFile>{
 
 
     public static enum RecordType {
@@ -39,6 +39,8 @@ public class NACHAFormat {
     public static  int  BLOCK_SIZE=10;
     public static  int  ADDENDA_RECORD_SIZE=80;
 
+    public static String FILLING = StringUtils.repeat('9',RECORD_SIZE);
+
     public static RecordFormat NACHA_FILE_HEADER = RecordFormat.FIXED_LENGTH.withFields( new FieldFormat[] {
             new FieldFormat(1, "RecordType", "%d", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(2, "PriorityCode", "%d", 2, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
@@ -59,7 +61,7 @@ public class NACHAFormat {
             new FieldFormat(1, "RecordType", "%d", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(2, "BatchCount", "%d", 6, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(3, "BlockCount", "%d", 6, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
-            new FieldFormat(4, "EntryCount", "%d", 6, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
+            new FieldFormat(4, "EntryCount", "%d", 8, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(5, "EntryHash", "%d", 10, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(6, "TotalDebit", "%d", 12, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(7, "TotalCredit", "%d", 12, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
@@ -73,12 +75,12 @@ public class NACHAFormat {
             new FieldFormat(4, "CoDiscData", "%s", 20, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(5, "CompanyID", "%s", 10, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(6, "SEC", "%s", 3, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
-            new FieldFormat(7, "EntityDescription", "%s", 10, '0', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
-            new FieldFormat(8, "CoDescriptiveDate", "%s", 6, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(7, "EntityDescription", "%s", 10, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(8, "CoDescriptiveDate", "yyMMdd", 6, ' ', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.DATE),
             new FieldFormat(9, "EffectiveDate", "yyMMdd", 6, ' ', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.DATE),
-            new FieldFormat(10, "SettlementDate", "%d", 3, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
-            new FieldFormat(11, "OriginStatusCode", "%s", 1, ' ', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.STRING),
-            new FieldFormat(12, "OriginDFI", "%S", 8, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.INT),
+            new FieldFormat(10, "SettlementDate", "%s", 3, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(11, "OriginStatusCode", "%s", 1, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(12, "OriginDFI", "%S", 8, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(13, "BatchNumber", "%d", 7, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT)
     });
 
@@ -99,16 +101,16 @@ public class NACHAFormat {
     public static RecordFormat NACHA_ENTRY = RecordFormat.FIXED_LENGTH.withFields(new FieldFormat[] {
             new FieldFormat(1, "RecordType", "%d", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(2, "TransactionCode", "%2d", 2, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
-            new FieldFormat(3, "ReceivingDFI", "%s", 8, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(3, "ReceivingDFI", "%S", 8, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(4, "CheckDigit", "%d", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
             new FieldFormat(5, "DFIAccount", "%s", 17, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(6, "Amount", "%d", 10, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
-            new FieldFormat(7, "IndividualIdentificationNumber", "%s", 15, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(7, "IndividualID", "%s", 15, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(8, "IndividualName", "%s", 22, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
             new FieldFormat(9, "DiscretionaryData", "%s", 2, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
-            new FieldFormat(10, "AddendaIndicator", "%s", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
-            new FieldFormat(11, "OriginDFI", "%s", 8, ' ', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.STRING),
-            new FieldFormat(11, "Sequence", "%s", 7, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING)
+            new FieldFormat(10, "AddendaIndicator", "%d", 1, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT),
+            new FieldFormat(11, "OriginDFI", "%S", 8, ' ', FieldFormat.Alignment.LEFT, FieldFormat.DataType.STRING),
+            new FieldFormat(11, "Sequence", "%s", 7, '0', FieldFormat.Alignment.RIGHT, FieldFormat.DataType.INT)
     });
 
     public static RecordFormat NACHA_ADDENDA = RecordFormat.FIXED_LENGTH.withFields(new FieldFormat[] {
@@ -170,7 +172,8 @@ public class NACHAFormat {
     }
 
 
-    public void format(StringBuilder sb , NACHAFile file, NACHACompanyBatch [] batches){
+    @Override
+    public void format(StringBuilder sb , NACHAFile file){
         Object[] header = file.toFileHeaderArray();
         NACHA_FILE_HEADER.format(sb, header);
 
@@ -182,9 +185,9 @@ public class NACHAFormat {
 
         BigDecimal totalDebits = BigDecimal.valueOf(0);
         BigDecimal totalCredits = BigDecimal.valueOf(0);
-        BigInteger entryHashSum = BigInteger.valueOf(0);
+        long entryHashSum = 0;
 
-        for(NACHACompanyBatch batch : batches){
+        for(NACHACompanyBatch batch : file.getBatches()){
             batchCount++;
             batch.setBatchNumber(batchCount);
             NACHA_BATCH_HEADER.format(sb, batch.toBatchHeaderArray());
@@ -254,33 +257,69 @@ public class NACHAFormat {
     }
 
 
-    public NACHAFile parseNACHAFile(InputStream in) throws ParseException {
+
+    @Override
+    public NACHAFile parse(InputStream in)
+            throws InvalidFormatDefinition {
 
         Scanner sc = new Scanner(in);
         sc.useDelimiter("\n");
         NACHAFile file = new NACHAFile();
+        NACHACompanyBatch batch = null;
+
+        List<NACHAAddenda> addendaRecords = null;
+
         while(sc.hasNext()){
             String recordLine = sc.nextLine();
             int recordType = Integer.valueOf((recordLine.substring(0,1)));
-            switch(recordType){
-                case 1:
-                    Object[] header = NACHA_FILE_HEADER.parseLine(recordLine);
-                    break;
-                case 5:
-                    Object[] batchHeader = NACHA_BATCH_HEADER.parseLine(recordLine);
-                    break;
-                case 6:
-                    Object[] entries = NACHA_ENTRY.parseLine(recordLine);
-                    break;
-                case 7:
-                    Object[] addenda = NACHA_ADDENDA.parseLine(recordLine);
-                    break;
-                case 8:
-                    Object[] batchControl = NACHA_BATCH_CONTROL.parseLine(recordLine);
-                    break;
-                case 9:
-                    Object[] fileControl = NACHA_FILE_CONTROL.parseLine(recordLine);
-                    break;
+            try {
+                switch(recordType){
+                    case 1:
+                        Object[] header = new Object[0];
+                            header = NACHA_FILE_HEADER.parseLine(recordLine);
+                            file.setValues(header);
+                        break;
+                    case 5:
+                        Object[] batchHeader = NACHA_BATCH_HEADER.parseLine(recordLine);
+                        batch = new NACHACompanyBatch();
+                        batch.setValues(batchHeader);
+
+                        addendaRecords = new ArrayList<>();
+
+                        break;
+                    case 6:
+                        Object[] entry = NACHA_ENTRY.parseLine(recordLine);
+                        NACHAEntry e = new NACHAEntry();
+                        e.setValues(entry);
+                        batch.addEntry(e);
+                        break;
+                    case 7:
+                        Object[] adden = NACHA_ADDENDA.parseLine(recordLine);
+
+                        NACHAAddenda addenda = new NACHAAddenda();
+                        addenda.setValues(adden);
+                        addendaRecords.add(addenda);
+                        break;
+                    case 8:
+                        Object[] batchControl = NACHA_BATCH_CONTROL.parseLine(recordLine);
+                        batch.addAddenda(addendaRecords);
+                        addendaRecords = null;
+
+                        file.addBatch(batch);
+                        //TODO: validate batch with batch control record
+                        // SEC addenda
+                        // count
+                        // hash
+                        // total debits/total cedits
+                        break;
+                    case 9:
+                        if(FILLING.equals(recordLine)) break;
+                        Object[] fileControl = NACHA_FILE_CONTROL.parseLine(recordLine);
+                        //TODO: validate fill with file control record
+                        break;
+                }
+            } catch (ParseException e) {
+                throw new InvalidFormatDefinition(e.getMessage());
             }
         }
 

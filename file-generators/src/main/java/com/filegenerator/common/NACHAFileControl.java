@@ -11,19 +11,31 @@ public class NACHAFileControl {
     int batchCount;
     int blockCount;
     int entryCount;
-    BigInteger entryHash;
-    BigDecimal totalDebits;
-    BigDecimal totalCredits;
+    long entryHash;
+    BigDecimal totalDebits = new BigDecimal(0);
+    BigDecimal totalCredits = new BigDecimal(0);
 
 
     public Object[] toArray(){
         return new Object[]{
-                Integer.valueOf(batchCount),
-                Integer.valueOf(blockCount),
+                recordType,
+                batchCount,
+                blockCount,
                 entryHash,
-                totalDebits,
-                totalCredits,
-                new String(),
+                totalDebits.multiply(new BigDecimal(100)).intValue(),
+                totalCredits.multiply(new BigDecimal(100)).intValue(),
+                "",
         };
+    }
+
+
+    public void setValues(Object[] values){
+        recordType = Integer.valueOf(values[0].toString()).intValue();
+        batchCount = Integer.valueOf(values[1].toString()).intValue();
+        blockCount = Integer.valueOf(values[2].toString()).intValue();
+        entryCount = Integer.valueOf(values[3].toString()).intValue();
+        entryHash = (long) values[4];
+        totalDebits = new BigDecimal( ((long)values[5])/100.00);;
+        totalCredits = new BigDecimal( ((long)values[6])/100.00);;
     }
 }

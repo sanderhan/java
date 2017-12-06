@@ -1,8 +1,9 @@
 package com.filegenerator;
 
-public class FileGeneratorFactory {
-    public static IFileGenerator ceateFileGenerator(){
-        return new FileGenerator();
+public class FileGeneratorBuilder {
+
+    public static FlatFileGenerator ceateFileGenerator(){
+        return new FlatFileGenerator();
     }
     public static NACHAGenerator ceateNACHAGenerator(){
         return new NACHAGenerator();
